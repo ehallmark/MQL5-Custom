@@ -39,7 +39,7 @@ public:
 
 
 Solution* TradeSolutionCreator::randomSolution(void) {
-   TrainableExpert* expert = new TrainableExpert(true);
-   if(!expert.Init(Symbol(),Period(),true,rand())) return randomSolution();
+   TrainableExpert* expert = new TrainableExpert();
+   if(!expert.Init(Symbol(),Period(),true,rand())) return NULL;
    return new TradeSolution(expert,account);
 }

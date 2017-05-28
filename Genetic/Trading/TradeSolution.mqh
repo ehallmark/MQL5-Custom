@@ -67,14 +67,14 @@ void TradeSolution::calculateFitness(void) {
 }
 
 Solution* TradeSolution::mutate(void) {
-   TrainableExpert* newExpert = new TrainableExpert(true);
-   newExpert.Init(Symbol(),Period(),true,rand());
+   TrainableExpert* newExpert = new TrainableExpert();
+   if(!newExpert.Init(Symbol(),Period(),true,rand())) return NULL;
    return new TradeSolution(newExpert,account);
 }
 
 Solution* TradeSolution::crossover(Solution *other) {
-   TrainableExpert* newExpert = new TrainableExpert(true);
-   newExpert.Init(Symbol(),Period(),true,rand());
+   TrainableExpert* newExpert = new TrainableExpert();
+   if(!newExpert.Init(Symbol(),Period(),true,rand())) return NULL;
    return new TradeSolution(newExpert,account);
 }
 

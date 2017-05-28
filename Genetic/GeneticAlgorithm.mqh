@@ -33,7 +33,6 @@
 
 class GeneticAlgorithm : public CObject {
 private:
-   CList population;
    int maxPopulationSize;
    double startingScore;
    Solution* bestSolutionSoFar;
@@ -42,10 +41,12 @@ private:
    int crossoverCounter;
    SolutionCreator* creator;
    int timePeriod;
+   CList* population;
 public:
    GeneticAlgorithm(SolutionCreator*, int, int);
    ~GeneticAlgorithm(void) {};
    void calculateSolutionsAndKillOfTheWeak(void);
+   CList* getPopulation(void) { return population; };
    void simulateEpoch(double probMutation, double probCrossover);
    Solution* getBestSolution(void) { return bestSolutionSoFar; };
 };
@@ -55,13 +56,17 @@ GeneticAlgorithm::GeneticAlgorithm(SolutionCreator* _creator, int _maxPopulation
                                                                mutationCounter(0),
                                                                maxPopulationSize(_maxPopulationSize),
                                                                crossoverCounter(0),
+                                                               population(new CList()),
                                                                creator(_creator),
                                                                timePeriod(_timePeriod),
                                                                bestSolutionSoFar(NULL)
 {
    MathSrand(69);
    for(int i = 0; i < maxPopulationSize; i++) {
-      population.Add(creator.randomSolution());
+      Solution* solution = creator.randomSolution();
+      if(solution!=NULL) {
+         population.Add(solution);
+      }
    }
    calculateSolutionsAndKillOfTheWeak();
    startingScore=currentScore;
@@ -75,16 +80,20 @@ void GeneticAlgorithm::calculateSolutionsAndKillOfTheWeak(void) {
       node=population.GetNextNode();
    }
    
-   population.Sort(0);
+   population.Sort(1);
    
-   bestSolutionSoFar = dynamic_cast<Solution*>(population.GetFirstNode());
+   Solution* potentialBest = dynamic_cast<Solution*>(population.GetFirstNode());
+   Solution* loser = dynamic_cast<Solution*>(population.GetLastNode());
+   if(potentialBest.fitness()<loser.fitness()) Print("YOU SHOULD SWITCH THE SORT ORDER!!!!!!!!!!!!!!");
+   if(bestSolutionSoFar==NULL || bestSolutionSoFar.fitness() < potentialBest.fitness()) {
+      bestSolutionSoFar = potentialBest;
+   }
    
    // delete weak ones
-   CObject* lastNode = population.GetLastNode();
-   node = population.GetNodeAtIndex(maxPopulationSize);
+   CObject* lastNode = population.GetNodeAtIndex(population.Size());
    while(population.Size()>maxPopulationSize) {
       Print(string(population.Size()));
-      population.DetachCurrent();
+      population.DeleteCurrent();
    }
    
    // calculate score
@@ -111,7 +120,7 @@ void GeneticAlgorithm::simulateEpoch(double probMutation,double probCrossover) {
    // mutate
    CObject* node = population.GetFirstNode();
    while(node!=NULL) {
-      if(double(MathRand())/32767 < probMutation) {
+      if(double(MathRand())/32767.0 < probMutation) {
          Solution* mutation = dynamic_cast<Solution*>(node).mutate();
          if(mutation!=NULL) {
             children.Add(mutation);
@@ -125,9 +134,8 @@ void GeneticAlgorithm::simulateEpoch(double probMutation,double probCrossover) {
    int idx=0;
    while(node!=NULL) {
       if(double(MathRand())/32767 < probMutation) {
-         int randIdx = MathRand() % maxPopulationSize;
-         Solution* mom = dynamic_cast<Solution*>(node);
-         population.GetNodeAtIndex(randIdx);
+         int randIdx = MathRand() % population.Size();
+         Solution* mom = population.GetNodeAtIndex(randIdx);
          Solution* dad = dynamic_cast<Solution*>(population.GetNodeAtIndex(idx));
          Solution* offspring = mom.crossover(dad);
          if(offspring!=NULL) {

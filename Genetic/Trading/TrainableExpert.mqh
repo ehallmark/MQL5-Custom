@@ -42,13 +42,15 @@ private:
    double SignalStopLoss;
 protected:
    int randInt(int lower, int upper);
+   ulong magic;
    double randDouble(double lower, double upper);
 public:
-   TrainableExpert(bool);
+   TrainableExpert();
    void RandomizeParams(int,int,int,int,int,int,double,double,double,double);
    virtual void      OnTick(void);
    virtual void      OnTrade(void);
    virtual void      OnTimer(void);
+   ulong Magic(void) { return magic; };
    bool              Init(string symbol,ENUM_TIMEFRAMES period,bool every_tick,ulong magic=0);
 };
 
@@ -64,14 +66,13 @@ void TrainableExpert::OnTimer(void) {
    CExpert::OnTimer();
 }
 
-TrainableExpert::TrainableExpert(bool Expert_EveryTick) : failed(false), isTurnedOn(false) {
-
-}
+TrainableExpert::TrainableExpert() : failed(false), isTurnedOn(false) {}
 
 
 bool TrainableExpert::Init(string symbol,ENUM_TIMEFRAMES period,bool every_tick,ulong magic=0) {
+   this.magic=magic;
 //--- Initializing expert
-   RandomizeParams(0,50,50,100,0,100,10,100,10,100);
+   RandomizeParams(0,50,50,100,0,100,0.001,5,0.001,5);
    if(!CExpert::Init(symbol,period,every_tick,magic))
      {
       //--- failed
