@@ -27,17 +27,19 @@
 //+------------------------------------------------------------------+
 #include<Genetic/SolutionCreator.mqh>
 #include<Genetic/Trading/TradeSolution.mqh>
+#include<Genetic/Trading/TrainableExpert.mqh>
 
 class TradeSolutionCreator : public SolutionCreator {
 private:
-   CList* allExperts;
    CAccountInfo* account;
 public:
-   TradeSolutionCreator(CList* _allExperts, CAccountInfo* _account) : allExperts(_allExperts), account(_account) {};
+   TradeSolutionCreator(CAccountInfo* _account) : account(_account) {};
    virtual Solution* randomSolution(void) override;
 };
 
 
 Solution* TradeSolutionCreator::randomSolution(void) {
-   return new TradeSolution(allExperts,account);
+   TrainableExpert* expert = new TrainableExpert(true);
+   if(!expert.Init(Symbol(),Period(),true,rand())) return randomSolution();
+   return new TradeSolution(expert,account);
 }

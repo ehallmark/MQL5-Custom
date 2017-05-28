@@ -79,10 +79,12 @@ void GeneticAlgorithm::calculateSolutionsAndKillOfTheWeak(void) {
    
    bestSolutionSoFar = dynamic_cast<Solution*>(population.GetFirstNode());
    
+   // delete weak ones
+   CObject* lastNode = population.GetLastNode();
    node = population.GetNodeAtIndex(maxPopulationSize);
-   while(node!=NULL) {
-      population.DeleteCurrent();
-      node=population.GetNextNode();
+   while(population.Size()>maxPopulationSize) {
+      Print(string(population.Size()));
+      population.DetachCurrent();
    }
    
    // calculate score
@@ -137,10 +139,9 @@ void GeneticAlgorithm::simulateEpoch(double probMutation,double probCrossover) {
    }
    
    // add children to list
-   node=children.GetFirstNode();
-   while(node!=NULL) {
-      population.Add(node);
-      node=children.GetNextNode();
+   children.GetFirstNode();
+   while(children.Size()>0) {
+      population.Add(children.DetachCurrent());
    }
    
    calculateSolutionsAndKillOfTheWeak();

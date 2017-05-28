@@ -29,25 +29,27 @@
 #include<Genetic/Solution.mqh>
 #include <Trade/AccountInfo.mqh>
 #include<Expert/Expert.mqh>
+#include<Genetic/Trading/TrainableExpert.mqh>
 #include<Arrays/List.mqh>
 class TradeSolution : public Solution {
 protected:
    const CAccountInfo* account;
    int numIterations;
    double startingBalance;
-
+   TrainableExpert* expert;
 public:
-   CList* experts;
-   TradeSolution(CList*, const CAccountInfo*);
+   
+   TradeSolution(TrainableExpert*, const CAccountInfo*);
    ~TradeSolution(void) {};
    virtual void calculateFitness(void);
    virtual Solution* mutate(void);
    virtual Solution* crossover(Solution* other);
    virtual void nextTimeStep(void);
+   TrainableExpert* getExpert(void);
 };
 
-TradeSolution::TradeSolution(CList* _experts, const CAccountInfo *_account) : 
-                                                              experts(_experts),
+TradeSolution::TradeSolution(TrainableExpert* _expert, const CAccountInfo *_account) : 
+                                                              expert(_expert),
                                                               account(_account),
                                                               numIterations(0), 
                                                               startingBalance(_account.Balance()) {
@@ -65,14 +67,15 @@ void TradeSolution::calculateFitness(void) {
 }
 
 Solution* TradeSolution::mutate(void) {
-   CList* newExperts = new CList();
-   
-   
-   return new TradeSolution(newExperts,account);
+   TrainableExpert* newExpert = new TrainableExpert(true);
+   newExpert.Init(Symbol(),Period(),true,rand());
+   return new TradeSolution(newExpert,account);
 }
 
 Solution* TradeSolution::crossover(Solution *other) {
-   CList* newExperts = new CList();
-   
-   return new TradeSolution(newExperts,account);
+   TrainableExpert* newExpert = new TrainableExpert(true);
+   newExpert.Init(Symbol(),Period(),true,rand());
+   return new TradeSolution(newExpert,account);
 }
+
+TrainableExpert* TradeSolution::getExpert(void) {return expert; }
